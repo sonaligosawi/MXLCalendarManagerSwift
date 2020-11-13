@@ -78,6 +78,7 @@ public class MXLCalendarManager {
         var eventScanner = Scanner(string: string)
         var uri = String()
         var role = String()
+        var partStat = String()
         var comomName = String()
         var uriPointer: NSString?
         var attributesPointer: NSString?
@@ -92,25 +93,37 @@ public class MXLCalendarManager {
         if let attributesPointer = attributesPointer {
             eventScanner = Scanner(string: attributesPointer as String)
 
-            eventScanner.scanUpTo("ROLE", into: nil)
+            eventScanner.scanUpTo("ROLE=", into: nil)
             eventScanner.scanUpTo(";", into: &holderPointer)
 
             if let holderPointer = holderPointer {
-                role = holderPointer.replacingOccurrences(of: "ROLE", with: "")
+                role = holderPointer.replacingOccurrences(of: "ROLE=", with: "")
             }
 
             eventScanner = Scanner(string: attributesPointer as String)
-            eventScanner.scanUpTo("CN", into: nil)
+            eventScanner.scanUpTo("CN=", into: nil)
             eventScanner.scanUpTo(";", into: &holderPointer)
 
             if let holderPointer = holderPointer {
-                comomName = holderPointer.replacingOccurrences(of: "CN", with: "")
+                comomName = holderPointer.replacingOccurrences(of: "CN=", with: "")
+            }
+            
+            eventScanner = Scanner(string: attributesPointer as String)
+            eventScanner.scanUpTo("PARTSTAT=", into: nil)
+            eventScanner.scanUpTo(";", into: &holderPointer)
+
+            if let holderPointer = holderPointer {
+                partStat = holderPointer.replacingOccurrences(of: "PARTSTAT=", with: "")
             }
         }
         guard let roleEnum = Role(rawValue: role) else {
             return nil
         }
-        return MXLCalendarAttendee(withRole: roleEnum, commonName: comomName, andUri: uri)
+        guard let partStatEnum = PartStat(rawValue: partStat) else {
+            return nil
+        }
+        
+        return MXLCalendarAttendee(withRole: roleEnum, commonName: comomName, andUri: uri, participantStatus: partStatEnum)
     }
 
     public func parse(icsString: String, withCompletionHandler callback: @escaping (MXLCalendar?, Error?) -> Void) {
