@@ -101,7 +101,8 @@ public class MXLCalendarManager {
             }
 
             eventScanner = Scanner(string: attributesPointer as String)
-            if eventScanner.scanUpTo("CN=", into: nil) {
+            let scannerStatus = eventScanner.scanUpTo("CN=", into: nil)
+            if scannerStatus {
                 eventScanner.scanUpTo(";", into: &holderPointer)
                 if let holderPointer = holderPointer {
                     comomName = holderPointer.replacingOccurrences(of: "CN=", with: "")
